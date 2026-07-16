@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Circle, ArrowRight } from "lucide-react";
+import { Circle, CheckCircle2, ArrowRight } from "lucide-react";
 import { modules } from "@/lib/data/modules";
+import { getProfile } from "@/lib/data/profile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -11,7 +12,10 @@ export const metadata = {
   description: "Полный путь обучения Vibe Coding от новичка до первых денег.",
 };
 
-export default function RoadmapPage() {
+export default async function RoadmapPage() {
+  const profile = await getProfile();
+  const completed = new Set(profile?.completedLessons ?? []);
+
   return (
     <div className="container mx-auto px-4 lg:px-6 py-12">
       <div className="text-center mb-12">
@@ -44,22 +48,35 @@ export default function RoadmapPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
-                {m.lessons.map((l) => (
-                  <Link
-                    key={l.id}
-                    href={`/learn/${l.id}`}
-                    className="flex items-center justify-between rounded-lg bg-white/[0.03] border border-white/[0.06] p-3 hover:border-emerald-500/30 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Circle size={16} className="text-muted-foreground" />
-                      <span className="font-medium">{l.title}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">{l.xp} XP</Badge>
-                      <ArrowRight size={14} className="text-muted-foreground" />
-                    </div>
-                  </Link>
-                ))}
+                {m.lessons.map((l) => {
+                  const isDone = completed.has(l.id);
+                  return (
+                    <Link
+                      key={l.id}
+                      href={`/learn/${l.id}`}
+                      className="flex items-center justify-between rounded-lg bg-white/[0.03] border border-white/[0.06] p-3 hover:border-emerald-500/30 transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        {isDone ? (
+                          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                        ) : (
+                          <Circle size={16} className="text-muted-foreground" />
+                        )}
+                        <span className={`font-medium ${isDone ? "text-emerald-400" : ""}`}>
+                          {l.title}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {isDone ? (
+                          <Badge variant="success">Пройдено</Badge>
+                        ) : (
+                          <Badge variant="outline">{l.xp} XP</Badge>
+                        )}
+                        <ArrowRight size={14} className="text-muted-foreground" />
+                      </div>
+                    </Link>
+                  );
+                })}
               </CardContent>
             </Card>
           </div>
