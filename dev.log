@@ -1,0 +1,199 @@
+$ next dev
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3000
+   - Network:      http://172.18.0.1:3000
+
+ ✓ Starting...
+ ✓ Ready in 4.1s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 539ms (158 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 2.4s (851 modules)
+ GET / 200 in 4057ms
+ GET / 200 in 694ms
+ GET / 200 in 566ms
+ ✓ Compiled in 2.2s (865 modules)
+ GET / 200 in 507ms
+ GET / 200 in 227ms
+ ✓ Compiled in 893ms (865 modules)
+ GET / 200 in 654ms
+ GET / 200 in 657ms
+ ✓ Compiled in 693ms (865 modules)
+ GET / 200 in 633ms
+ GET / 200 in 636ms
+ ✓ Compiled in 1002ms (861 modules)
+ GET / 200 in 698ms
+ GET / 200 in 701ms
+ ✓ Compiled in 656ms (861 modules)
+ GET / 200 in 709ms
+ GET / 200 in 711ms
+ ✓ Compiled in 573ms (861 modules)
+ GET / 200 in 700ms
+ GET / 200 in 703ms
+ ✓ Compiled in 564ms (861 modules)
+ GET / 200 in 560ms
+ GET / 200 in 561ms
+ ✓ Compiled in 506ms (860 modules)
+ GET / 200 in 477ms
+ GET / 200 in 479ms
+ ✓ Compiled in 556ms (860 modules)
+ GET / 200 in 559ms
+ GET / 200 in 562ms
+ ✓ Compiled in 491ms (860 modules)
+ GET / 200 in 539ms
+ GET / 200 in 540ms
+ ✓ Compiled in 467ms (858 modules)
+ GET / 200 in 459ms
+ GET / 200 in 462ms
+ ✓ Compiled in 488ms (858 modules)
+ GET / 200 in 434ms
+ GET / 200 in 438ms
+ ✓ Compiled in 489ms (858 modules)
+ GET / 200 in 536ms
+ GET / 200 in 540ms
+ ✓ Compiled in 1200ms (858 modules)
+ GET / 200 in 537ms
+ GET / 200 in 338ms
+ ✓ Compiled in 1148ms (858 modules)
+ ✓ Compiled in 828ms (337 modules)
+ GET / 200 in 973ms
+ GET / 200 in 974ms
+ GET / 200 in 533ms
+ GET / 200 in 520ms
+ ✓ Compiled in 529ms (337 modules)
+ ✓ Compiled in 308ms (337 modules)
+ GET / 200 in 468ms
+ GET / 200 in 470ms
+ GET / 200 in 348ms
+ GET / 200 in 350ms
+ ✓ Compiled in 302ms (337 modules)
+ GET / 200 in 365ms
+ GET / 200 in 368ms
+ ✓ Compiled in 267ms (337 modules)
+ GET / 200 in 214ms
+ GET / 200 in 215ms
+ ✓ Compiled in 251ms (337 modules)
+ GET / 200 in 424ms
+ GET / 200 in 425ms
+ ✓ Compiled in 306ms (337 modules)
+ GET / 200 in 472ms
+ GET / 200 in 472ms
+ ✓ Compiled in 287ms (337 modules)
+ GET / 200 in 403ms
+ GET / 200 in 403ms
+ ✓ Compiled in 342ms (337 modules)
+ GET / 200 in 435ms
+ GET / 200 in 439ms
+ ✓ Compiled in 405ms (337 modules)
+ GET / 200 in 527ms
+ GET / 200 in 535ms
+ ✓ Compiled in 327ms (337 modules)
+ GET / 200 in 208ms
+ GET / 200 in 207ms
+ ✓ Compiled in 322ms (337 modules)
+ GET / 200 in 393ms
+ GET / 200 in 398ms
+ ✓ Compiled in 366ms (337 modules)
+ GET / 200 in 345ms
+ GET / 200 in 347ms
+ ✓ Compiled in 261ms (337 modules)
+ GET / 200 in 408ms
+ GET / 200 in 412ms
+ ✓ Compiled in 1184ms (858 modules)
+ ✓ Compiled in 363ms (337 modules)
+ GET / 200 in 657ms
+ GET / 200 in 660ms
+ GET / 200 in 370ms
+ GET / 200 in 371ms
+ ✓ Compiled in 393ms (337 modules)
+ GET / 200 in 501ms
+ GET / 200 in 504ms
+ ✓ Compiled in 612ms (858 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 200 in 41ms
+ GET / 200 in 1465ms
+ GET / 200 in 922ms
+ ✓ Compiled in 1153ms (858 modules)
+ ✓ Compiled in 309ms (337 modules)
+ GET / 200 in 685ms
+ GET / 200 in 686ms
+ ✓ Compiled in 2.5s (857 modules)
+ ⨯ ReferenceError: Cases is not defined
+    at HomePage (src\app\page.tsx:18:8)
+  16 |       <AntiAudience />
+  17 |       <Program />
+> 18 |       <Cases />
+     |        ^
+  19 |       <RoadmapPreview />
+  20 |       <Features />
+  21 |       <Pricing /> {
+  digest: '2061789237'
+}
+ GET / 200 in 614ms
+ ⨯ ReferenceError: Cases is not defined
+    at HomePage (src\app\page.tsx:18:8)
+  16 |       <AntiAudience />
+  17 |       <Program />
+> 18 |       <Cases />
+     |        ^
+  19 |       <RoadmapPreview />
+  20 |       <Features />
+  21 |       <Pricing /> {
+  digest: '2061789237'
+}
+ GET / 200 in 213ms
+ ✓ Compiled in 886ms (857 modules)
+ GET / 200 in 2430ms
+ GET / 200 in 916ms
+ ✓ Compiled in 1610ms (857 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 200 in 1696ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: EPERM: operation not permitted, rename 'C:\Users\Савелий\Documents\New OpenCode Project\vibe-coding-platform\.next\cache\webpack\server-development\11.pack.gz_' -> 'C:\Users\Савелий\Documents\New OpenCode Project\vibe-coding-platform\.next\cache\webpack\server-development\11.pack.gz'
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1148ms (862 modules)
+ GET / 404 in 1637ms
+ ⨯ ./src/components/home/roadmap-preview.tsx
+Error:   [31mx[0m Expected '</', got ';'
+    ,-[[36;1;4mC:\Users\Савелий\Documents\New OpenCode Project\vibe-coding-platform\src\components\home\roadmap-preview.tsx[0m:51:1]
+ [2m48[0m |                   {m.lessons.reduce((s, l) => s + l.xp, 0)} XP
+ [2m49[0m |                 </p>
+ [2m50[0m |               </div>
+ [2m51[0m |             );
+    : [35;1m             ^[0m
+ [2m52[0m |           })}
+ [2m53[0m |         </div>
+ [2m54[0m |       </div>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/home/roadmap-preview.tsx
+./src/app/page.tsx
+ ✓ Compiled in 840ms (857 modules)
+ ✓ Compiled in 421ms (337 modules)
+ ✓ Compiled in 372ms (337 modules)
+ ✓ Compiled in 327ms (337 modules)
+ ✓ Compiled in 397ms (337 modules)
+ ✓ Compiled in 1315ms (857 modules)
+ ✓ Compiled in 346ms (337 modules)
+ ✓ Compiled in 1058ms (857 modules)
+ ✓ Compiled in 1343ms (857 modules)
+ ✓ Compiled in 956ms (857 modules)
+ ✓ Compiled in 793ms (337 modules)
+ ✓ Compiled in 551ms (337 modules)
+ ✓ Compiled in 2.8s (515 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (106kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (253kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled in 391ms (337 modules)
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3000
+   - Network:      http://172.18.0.1:3000
+
+ ✓ Starting...
+ ✓ Ready in 5.6s
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Савелий\Documents\New OpenCode Project\vibe-coding-platform\.next\cache\webpack\client-development\1.pack.gz_' -> 'C:\Users\Савелий\Documents\New OpenCode Project\vibe-coding-platform\.next\cache\webpack\client-development\1.pack.gz'
+   Reload env: .env.local
