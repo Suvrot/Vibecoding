@@ -5,9 +5,20 @@ const SYSTEM_PROMPT = `Ты — дружелюбный ИИ-наставник �
 Объясняй просто, давай примеры кода, подсказывай промпты. Будь поддерживающим. 
 Если вопрос не по теме кодинга — вежливо верни к обучению. Отвечай лаконично, но по делу. Максимум 3-4 абзаца.`;
 
+// ponytail: in-memory rate limiter, per-IP, resets on cold start
+// Upgrade path: Vercel KV or Supabase RPC if throughput matters
 const rateMap = new Map<string, { count: number; reset: number }>();
 const RATE_LIMIT = 20;
 const RATE_WINDOW = 60_000;
+
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return req.headers.get("x-real-ip") ?? "unknown";
+}
 
 function checkRate(ip: string): boolean {
   const now = Date.now();
@@ -21,8 +32,22 @@ function checkRate(ip: string): boolean {
   return true;
 }
 
+function sanitizeMessages(raw: unknown): { role: string; content: string }[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((m): m is { role: unknown; content: unknown } =>
+      typeof m === "object" && m !== null && "role" in m && "content" in m
+    )
+    .filter((m) => typeof m.content === "string" && m.content.length > 0)
+    .slice(-20)
+    .map((m) => ({
+      role: m.role === "user" ? "user" : "assistant",
+      content: String(m.content).slice(0, 2000),
+    }));
+}
+
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  const ip = getClientIp(req);
 
   if (!checkRate(ip)) {
     return NextResponse.json(
@@ -31,7 +56,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { messages } = await req.json();
+  const body = await req.json().catch(() => null);
+  const messages = sanitizeMessages(body?.messages);
+
+  if (messages.length === 0) {
+    return NextResponse.json(
+      { error: "Неверный формат сообщений." },
+      { status: 400 },
+    );
+  }
+
   const last = messages[messages.length - 1]?.content ?? "";
 
   const apiKey = process.env.GROQ_API_KEY;
@@ -51,10 +85,7 @@ export async function POST(req: NextRequest) {
         model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          ...messages.map((m: { role: string; content: string }) => ({
-            role: m.role,
-            content: m.content,
-          })),
+          ...messages,
         ],
         temperature: 0.7,
         max_tokens: 1024,

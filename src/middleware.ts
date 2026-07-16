@@ -7,10 +7,17 @@ const hasEnv =
 
 const protectedRoutes = ["/dashboard", "/projects", "/achievements"];
 const adminRoutes = ["/admin"];
-const adminEmail = process.env.ADMIN_EMAIL ?? "supermax44676@gmail.com";
+const adminEmail = process.env.ADMIN_EMAIL;
 
 export async function middleware(request: NextRequest) {
-  if (!hasEnv) return NextResponse.next();
+  // Fail closed: if env is missing, block all protected routes
+  if (!hasEnv || !adminEmail) {
+    const url = request.nextUrl.pathname;
+    if ([...protectedRoutes, ...adminRoutes].some((r) => url.startsWith(r))) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    return NextResponse.next();
+  }
 
   let supabaseResponse = NextResponse.next({ request });
 
@@ -28,7 +35,12 @@ export async function middleware(request: NextRequest) {
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
+            supabaseResponse.cookies.set(name, value, {
+              ...options,
+              sameSite: "lax",
+              httpOnly: true,
+              secure: true,
+            }),
           );
         },
       },

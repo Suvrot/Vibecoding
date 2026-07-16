@@ -1,7 +1,79 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// ponytail: same in-memory rate limiter, shared pattern
+const rateMap = new Map<string, { count: number; reset: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60_000;
+
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return req.headers.get("x-real-ip") ?? "unknown";
+}
+
+function checkRate(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateMap.get(ip);
+  if (!entry || now > entry.reset) {
+    rateMap.set(ip, { count: 1, reset: now + RATE_WINDOW });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
+function sanitize(input: unknown, maxLen = 500): string {
+  return typeof input === "string" ? input.trim().slice(0, maxLen) : "";
+}
+
+function buildPrompt(
+  role: string,
+  task: string,
+  context: string,
+  constraints: string,
+  format: string,
+  tone: string,
+): string {
+  const parts = [
+    `Ты — ${role}.`,
+    context && `Контекст: ${context}`,
+    `Задача: ${task || "..."}`,
+    constraints && `Ограничения: ${constraints}`,
+    `Формат ответа: ${format}.`,
+    `Тон общения: ${tone}.`,
+  ].filter(Boolean);
+  return parts.join("\n\n");
+}
+
 export async function POST(req: NextRequest) {
-  const { role, task, context, constraints, format, tone } = await req.json();
+  const ip = getClientIp(req);
+
+  if (!checkRate(ip)) {
+    return NextResponse.json(
+      { error: "Слишком много запросов. Подожди минуту." },
+      { status: 429 },
+    );
+  }
+
+  const body = await req.json().catch(() => null);
+
+  const role = sanitize(body?.role, 200);
+  const task = sanitize(body?.task, 1000);
+  const context = sanitize(body?.context, 500);
+  const constraints = sanitize(body?.constraints, 500);
+  const format = sanitize(body?.format, 200);
+  const tone = sanitize(body?.tone, 200);
+
+  if (!task) {
+    return NextResponse.json(
+      { error: "Поле «Задача» обязательно." },
+      { status: 400 },
+    );
+  }
 
   const apiKey = process.env.GROQ_API_KEY;
 
@@ -55,23 +127,4 @@ export async function POST(req: NextRequest) {
       enhanced: false,
     });
   }
-}
-
-function buildPrompt(
-  role: string,
-  task: string,
-  context: string,
-  constraints: string,
-  format: string,
-  tone: string,
-): string {
-  const parts = [
-    `Ты — ${role}.`,
-    context.trim() && `Контекст: ${context.trim()}`,
-    `Задача: ${task.trim() || "..."}`,
-    constraints.trim() && `Ограничения: ${constraints.trim()}`,
-    `Формат ответа: ${format}.`,
-    `Тон общения: ${tone}.`,
-  ].filter(Boolean);
-  return parts.join("\n\n");
 }

@@ -13,7 +13,7 @@ export function LessonView({
   onComplete,
 }: {
   lesson: Lesson;
-  onComplete: (xp: number) => void;
+  onComplete: () => void;
 }) {
   const [step, setStep] = React.useState<"learn" | "practice" | "quiz">(
     "learn",
@@ -31,7 +31,7 @@ export function LessonView({
 
   function finish() {
     setDone(true);
-    onComplete(lesson.xp);
+    onComplete();
   }
 
   if (done) {
