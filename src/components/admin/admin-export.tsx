@@ -12,6 +12,12 @@ type User = {
   created_at: string;
 };
 
+function escapeCsvCell(cell: string): string {
+  const dangerous = ["=", "+", "-", "@", "\t", "\r", "\n"];
+  const escaped = dangerous.some((c) => cell.startsWith(c)) ? `'${cell}` : cell;
+  return `"${escaped.replace(/"/g, '""')}"`;
+}
+
 export function AdminExport({ users }: { users: User[] }) {
   function downloadUsersCSV() {
     const headers = ["Email", "Username", "XP", "Level", "Уроков пройдено", "Дата регистрации"];
@@ -24,7 +30,7 @@ export function AdminExport({ users }: { users: User[] }) {
       new Date(u.created_at).toLocaleDateString("ru-RU"),
     ]);
 
-    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const csv = [headers, ...rows].map((r) => r.map(escapeCsvCell).join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

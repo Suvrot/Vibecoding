@@ -62,7 +62,7 @@ export function ProjectForm() {
         .filter(Boolean),
       link: link || null,
       repo: repo || null,
-      earned: Number(earned) || 0,
+      earned: Math.min(Number(earned) || 0, 99999),
     });
     setTitle("");
     setDescription("");

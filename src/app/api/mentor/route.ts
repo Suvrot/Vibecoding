@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 const SYSTEM_PROMPT = `Ты — дружелюбный ИИ-наставник по Vibe Coding на русском языке. 
 Помогаешь новичкам учиться кодить с помощью ИИ-инструментов (Cursor, VS Code, Windsurf, Lovable, Bolt.new, Replit, Claude, ChatGPT).
@@ -47,6 +48,13 @@ function sanitizeMessages(raw: unknown): { role: string; content: string }[] {
 }
 
 export async function POST(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+  }
+
   const ip = getClientIp(req);
 
   if (!checkRate(ip)) {
@@ -71,7 +79,7 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json({ reply: demoReply(last) });
+    return NextResponse.json({ reply: demoReply(last), degraded: true });
   }
 
   try {
@@ -95,11 +103,11 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
     const reply = data?.choices?.[0]?.message?.content;
     if (!reply) {
-      return NextResponse.json({ reply: demoReply(last) });
+      return NextResponse.json({ reply: demoReply(last), degraded: true });
     }
     return NextResponse.json({ reply });
   } catch {
-    return NextResponse.json({ reply: demoReply(last) });
+    return NextResponse.json({ reply: demoReply(last), degraded: true });
   }
 }
 

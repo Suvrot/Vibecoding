@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 // ponytail: same in-memory rate limiter, shared pattern
 const rateMap = new Map<string, { count: number; reset: number }>();
@@ -50,6 +51,13 @@ function buildPrompt(
 }
 
 export async function POST(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+  }
+
   const ip = getClientIp(req);
 
   if (!checkRate(ip)) {

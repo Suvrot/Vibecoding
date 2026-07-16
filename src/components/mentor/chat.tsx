@@ -124,6 +124,7 @@ export function MentorChat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Спроси наставника…"
+            maxLength={500}
           />
           <Button type="submit" size="icon" disabled={loading}>
             <Send size={16} />

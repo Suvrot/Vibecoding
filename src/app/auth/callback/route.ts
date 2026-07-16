@@ -6,6 +6,8 @@ const ALLOWED_HOSTS = [
   "localhost:3000",
 ];
 
+const ALLOWED_OTP_TYPES = ["email", "sms", "magiclink"];
+
 function getSafeOrigin(requestUrl: string): string {
   const { origin } = new URL(requestUrl);
   const hostname = new URL(origin).hostname;
@@ -29,7 +31,7 @@ export async function GET(request: Request) {
     }
   }
 
-  if (token_hash && type) {
+  if (token_hash && type && ALLOWED_OTP_TYPES.includes(type)) {
     const { error } = await supabase.auth.verifyOtp({
       type: type as "email" | "sms" | "magiclink",
       token: token_hash,

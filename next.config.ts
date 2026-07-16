@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline'",
               `connect-src 'self' https://api.groq.com https://${supabaseHost}`,
               `img-src 'self' https://avatars.githubusercontent.com https://${supabaseHost} data:`,

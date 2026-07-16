@@ -10,8 +10,6 @@ import {
   Shield,
 } from "lucide-react";
 
-export const adminEmail = "supermax44676@gmail.com";
-
 export const navLinks = [
   { href: "/", label: "Главная", icon: Home },
   { href: "/roadmap", label: "Дорожная карта", icon: Map },

@@ -6,11 +6,11 @@ import Link from "next/link";
 import { User, LogOut, Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { adminEmail } from "@/lib/data/nav";
 
 export function AuthButton() {
   const [user, setUser] = React.useState<{ email?: string } | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isAdmin, setIsAdmin] = React.useState(false);
 
   React.useEffect(() => {
     const supabase = createClient();
@@ -29,11 +29,16 @@ export function AuthButton() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  React.useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    fetch("/api/admin-check").then((r) => r.json()).then((d: { admin?: boolean }) => {
+      setIsAdmin(d.admin === true);
+    }).catch(() => {});
+  }, [user]);
+
   if (loading) {
     return <div className="h-9 w-20 animate-pulse rounded-lg bg-white/[0.06]" />;
   }
-
-  const isAdmin = user?.email === adminEmail;
 
   if (user) {
     return (
