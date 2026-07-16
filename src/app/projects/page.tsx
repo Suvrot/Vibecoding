@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { ExternalLink, Code, Trash2, Plus } from "lucide-react";
 import { requireUser, getProjects } from "@/lib/data/profile";
 import { ProjectForm } from "@/components/projects/project-form";
@@ -19,9 +20,10 @@ export default async function ProjectsPage() {
   async function deleteProject(formData: FormData) {
     "use server";
     const id = formData.get("id") as string;
-    if (!user) return;
+    if (!user || !id) return;
     const supabase = await createClient();
     await supabase.from("projects").delete().eq("id", id).eq("user_id", user.id);
+    revalidatePath("/projects");
   }
 
   return (

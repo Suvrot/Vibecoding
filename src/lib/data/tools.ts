@@ -6,7 +6,7 @@ export const tools: Tool[] = [
     name: "Cursor",
     category: "IDE",
     description:
-      "AI-редактор кода на базе VS Code. Лучший выбор для Vibe Coding: пишет, рефакторит и объясняет код по自然语言-запросам.",
+      "AI-редактор кода на базе VS Code. Лучший выбор для Vibe Coding: пишет, рефакторит и объясняет код по запросам на естественном языке.",
     pricing: "Бесплатно + Pro $20/мес",
     url: "https://cursor.com",
     tags: ["AI IDE", "Composer", "Tab completion"],
