@@ -33,15 +33,11 @@ export async function middleware(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
   const url = request.nextUrl.pathname;
 
   if (protectedRoutes.some((r) => url.startsWith(r))) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
     if (!user) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
