@@ -19,7 +19,7 @@ export function SiteHeader() {
   React.useEffect(() => {
     const supabase = createClient();
     if (!supabase) return;
-    supabase.auth.getUser().then((res) => {
+    supabase.auth.getUser().then((res: { data: { user: { email?: string } | null } }) => {
       setIsAdmin(res.data.user?.email === adminEmail);
     });
   }, []);
