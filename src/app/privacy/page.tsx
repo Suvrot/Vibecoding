@@ -80,8 +80,7 @@ export default function PrivacyPage() {
         <p>
           <strong className="text-foreground">8. Изменения</strong>
           <br />
-          Мы можем обновлять данную политику. Дата последнего обновления:{"
-          "}
+          Мы можем обновлять данную политику. Дата последнего обновления:{" "}
           {new Date().toLocaleDateString("ru-RU")}.
         </p>
       </div>
