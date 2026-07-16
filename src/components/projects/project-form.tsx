@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/input";
 
-export function ProjectForm({ onAdded }: { onAdded: () => void }) {
+export function ProjectForm() {
   const router = useRouter();
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -72,7 +72,6 @@ export function ProjectForm({ onAdded }: { onAdded: () => void }) {
     setEarned("");
     setSaving(false);
     router.refresh();
-    onAdded();
   }
 
   return (

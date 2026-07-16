@@ -40,9 +40,7 @@ export default async function ProjectsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ProjectForm
-            onAdded={() => {}}
-          />
+          <ProjectForm />
         </CardContent>
       </Card>
 
