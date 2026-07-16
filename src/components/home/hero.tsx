@@ -24,15 +24,10 @@ export function Hero() {
             до первых денег за 6 шагов.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-10 flex justify-center">
             <Link href="/learn">
-              <Button variant="gradient" size="lg">
+              <Button variant="gradient" size="lg" className="min-w-[280px]">
                 Начать бесплатно <ArrowRight size={18} />
-              </Button>
-            </Link>
-            <Link href="/#program">
-              <Button variant="outline" size="lg">
-                Смотреть программу
               </Button>
             </Link>
           </div>
