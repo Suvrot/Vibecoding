@@ -24,29 +24,7 @@ cp .env.example .env.local   # заполните значения Supabase
 pnpm dev
 ```
 
-Платформа **работает в demo-режиме без Supabase** (авторизация и сохранение
-профиля отключены, контент доступен). Чтобы включить полный функционал —
-подключите Supabase (см. ниже).
 
-## Подключение Supabase
-
-1. Создайте проект на [supabase.com](https://supabase.com).
-2. Скопируйте `URL` и `anon key` в `.env.local`:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=...
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-   ```
-3. Выполните SQL из `supabase/schema.sql` в SQL Editor (создаёт таблицы
-   `profiles`, `projects` и триггер профиля при регистрации).
-4. (Опционально) ИИ-наставник с реальным LLM — добавьте `OPENAI_API_KEY`,
-   `OPENAI_BASE_URL`, `OPENAI_MODEL` в `.env.local`. Без них работает demo-режим.
-
-## Деплой на Vercel
-
-1. Залейте код в GitHub.
-2. Импортируйте репозиторий на [vercel.com](https://vercel.com/new).
-3. Добавьте те же переменные окружения (Supabase + OpenAI).
-4. Deploy — готово.
 
 ## Структура
 
