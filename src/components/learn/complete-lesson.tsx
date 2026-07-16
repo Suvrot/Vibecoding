@@ -26,8 +26,9 @@ export function CompleteLesson({ lesson }: { lesson: Lesson }) {
       .single()) as { data: ProfileRow | null };
 
     const completed = new Set(profile?.completed_lessons ?? []);
+    const alreadyCompleted = completed.has(lesson.id);
     completed.add(lesson.id);
-    const newXp = (profile?.xp ?? 0) + xp;
+    const newXp = (profile?.xp ?? 0) + (alreadyCompleted ? 0 : xp);
     const achievements = new Set(profile?.achievements ?? []);
     achievements.add("first-step");
     if (lesson.moduleId === "m5") achievements.add("data-master");

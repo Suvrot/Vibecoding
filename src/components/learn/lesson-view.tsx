@@ -155,20 +155,20 @@ export function LessonView({
                           next[qi] = oi;
                           setAnswers(next);
                         }}
-                        className={`flex w-full items-center gap-2 rounded-lg border p-3 text-left text-sm transition-colors ${
+                        className={`flex w-full items-center gap-2 rounded-lg border p-3 text-left text-sm transition-all ${
                           showWrong
-                            ? "border-red-500 bg-red-500/10"
+                            ? "border-red-500 bg-red-500/10 text-red-300"
                             : showRight
-                              ? "border-emerald-500 bg-emerald-500/10"
+                              ? "border-emerald-500 bg-emerald-500/10 text-emerald-300"
                               : selected
-                                ? "border-emerald-500"
+                                ? "border-emerald-500 bg-emerald-500/5"
                                 : "border-white/[0.08] hover:border-emerald-500/30"
                         }`}
                       >
                         {submitted && isCorrect && (
-                          <CheckCircle2 size={16} className="text-emerald-400" />
+                          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
                         )}
-                        {showWrong && <XCircle size={16} className="text-red-400" />}
+                        {showWrong && <XCircle size={16} className="text-red-400 shrink-0" />}
                         {opt}
                       </button>
                     );
