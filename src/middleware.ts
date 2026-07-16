@@ -46,10 +46,10 @@ export async function middleware(request: NextRequest) {
     !url.includes(".") &&
     url !== "/favicon.ico"
   ) {
-    supabase.from("analytics").insert({
+    void supabase.from("analytics").insert({
       user_id: user?.id ?? null,
       page: url,
-    }).then(() => {}).catch(() => {});
+    });
   }
 
   // Protect admin routes
