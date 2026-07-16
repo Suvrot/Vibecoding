@@ -3,9 +3,10 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import * as React from "react";
 import Link from "next/link";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { adminEmail } from "@/lib/data/nav";
 
 export function AuthButton() {
   const [user, setUser] = React.useState<{ email?: string } | null>(null);
@@ -32,9 +33,18 @@ export function AuthButton() {
     return <div className="h-9 w-20 animate-pulse rounded-lg bg-white/[0.06]" />;
   }
 
+  const isAdmin = user?.email === adminEmail;
+
   if (user) {
     return (
       <div className="flex items-center gap-2">
+        {isAdmin && (
+          <Link href="/admin">
+            <Button variant="ghost" size="sm">
+              <Shield size={16} /> Админ
+            </Button>
+          </Link>
+        )}
         <Link href="/dashboard">
           <Button variant="outline" size="sm">
             <User size={16} /> Кабинет

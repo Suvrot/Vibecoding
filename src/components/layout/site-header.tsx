@@ -8,10 +8,21 @@ import { cn } from "@/lib/utils";
 import { navLinks } from "@/lib/data/nav";
 import { Button } from "@/components/ui/button";
 import { AuthButton } from "@/components/auth/auth-button";
+import { createClient } from "@/lib/supabase/client";
+import { adminEmail } from "@/lib/data/nav";
 
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  React.useEffect(() => {
+    const supabase = createClient();
+    if (!supabase) return;
+    supabase.auth.getUser().then((res) => {
+      setIsAdmin(res.data.user?.email === adminEmail);
+    });
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-background/60 surface-blur">
