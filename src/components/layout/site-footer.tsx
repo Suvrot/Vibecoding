@@ -59,24 +59,30 @@ export function SiteFooter() {
           </h4>
           <ul className="space-y-2.5 text-sm text-muted-foreground">
             <li>
-              <a href="#" className="hover:text-foreground transition-colors">
+              <a
+                href="https://t.me/slimgorur67"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors"
+              >
                 Telegram
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-foreground transition-colors">
-                YouTube
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-foreground transition-colors">
+              <Link
+                href="/privacy"
+                className="hover:text-foreground transition-colors"
+              >
                 Политика конфиденциальности
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-foreground transition-colors">
+              <Link
+                href="/oferta"
+                className="hover:text-foreground transition-colors"
+              >
                 Договор оферты
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

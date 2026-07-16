@@ -5,7 +5,6 @@ import { AntiAudience } from "@/components/home/anti-audience";
 import { Program } from "@/components/home/program";
 import { RoadmapPreview } from "@/components/home/roadmap-preview";
 import { Features } from "@/components/home/features";
-import { Pricing } from "@/components/home/pricing";
 import { Faq } from "@/components/home/faq";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +16,6 @@ export default function HomePage() {
       <Program />
       <RoadmapPreview />
       <Features />
-      <Pricing />
       <Faq />
 
       <section className="border-t border-white/[0.06]">
