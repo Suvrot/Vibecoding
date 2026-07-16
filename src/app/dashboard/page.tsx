@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Bot, Sparkles, Wallet } from "lucide-react";
 import { getProfile, getProjects, requireUser } from "@/lib/data/profile";
 import { StatsGrid } from "@/components/dashboard/stats";
+import { DeleteAccount } from "@/components/dashboard/delete-account";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -102,6 +103,10 @@ export default async function DashboardPage() {
         <div>
           <StatsGrid profile={profile} />
         </div>
+      </div>
+
+      <div className="mt-12 pt-8 border-t border-white/[0.06]">
+        <DeleteAccount />
       </div>
     </div>
   );

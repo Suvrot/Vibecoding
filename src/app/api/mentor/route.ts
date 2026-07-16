@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const SYSTEM_PROMPT = `Ты — дружелюбный ИИ-наставник по Vibe Coding на русском языке. 
 Помогаешь новичкам учиться кодить с помощью ИИ-инструментов (Cursor, VS Code, Windsurf, Lovable, Bolt.new, Replit, Claude, ChatGPT).
 Объясняй просто, давай примеры кода, подсказывай промпты. Будь поддерживающим. 
 Если вопрос не по теме кодинга — вежливо верни к обучению. Отвечай лаконично, но по делу. Максимум 3-4 абзаца.`;
-
-// ponytail: in-memory rate limiter, per-IP, resets on cold start
-// Upgrade path: Vercel KV or Supabase RPC if throughput matters
-const rateMap = new Map<string, { count: number; reset: number }>();
-const RATE_LIMIT = 20;
-const RATE_WINDOW = 60_000;
 
 function getClientIp(req: NextRequest): string {
   const forwarded = req.headers.get("x-forwarded-for");
@@ -19,18 +14,6 @@ function getClientIp(req: NextRequest): string {
     if (first) return first;
   }
   return req.headers.get("x-real-ip") ?? "unknown";
-}
-
-function checkRate(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateMap.get(ip);
-  if (!entry || now > entry.reset) {
-    rateMap.set(ip, { count: 1, reset: now + RATE_WINDOW });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
 }
 
 function sanitizeMessages(raw: unknown): { role: string; content: string }[] {
@@ -57,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   const ip = getClientIp(req);
 
-  if (!checkRate(ip)) {
+  if (!(await checkRateLimit(`mentor:${ip}`, 20, 60))) {
     return NextResponse.json(
       { error: "Слишком много запросов. Подожди минуту." },
       { status: 429 },

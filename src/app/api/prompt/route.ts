@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
-// ponytail: same in-memory rate limiter, shared pattern
-const rateMap = new Map<string, { count: number; reset: number }>();
-const RATE_LIMIT = 10;
-const RATE_WINDOW = 60_000;
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function getClientIp(req: NextRequest): string {
   const forwarded = req.headers.get("x-forwarded-for");
@@ -13,18 +9,6 @@ function getClientIp(req: NextRequest): string {
     if (first) return first;
   }
   return req.headers.get("x-real-ip") ?? "unknown";
-}
-
-function checkRate(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateMap.get(ip);
-  if (!entry || now > entry.reset) {
-    rateMap.set(ip, { count: 1, reset: now + RATE_WINDOW });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
 }
 
 function sanitize(input: unknown, maxLen = 500): string {
@@ -60,7 +44,7 @@ export async function POST(req: NextRequest) {
 
   const ip = getClientIp(req);
 
-  if (!checkRate(ip)) {
+  if (!(await checkRateLimit(`prompt:${ip}`, 10, 60))) {
     return NextResponse.json(
       { error: "Слишком много запросов. Подожди минуту." },
       { status: 429 },
