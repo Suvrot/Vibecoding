@@ -11,41 +11,70 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [mode, setMode] = React.useState<"login" | "signup">("login");
+  const [otp, setOtp] = React.useState("");
+  const [step, setStep] = React.useState<"email" | "otp">("email");
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setMessage(null);
     const supabase = createClient();
+    if (!supabase) {
+      setError("Сервис временно недоступен");
+      setLoading(false);
+      return;
+    }
 
-    if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) setError(error.message);
-      else router.push("/dashboard");
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
     } else {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-      if (error) setError(error.message);
-      else
-        setMessage(
-          "Проверьте почту — мы отправили ссылку для подтверждения.",
-        );
+      setMessage("Код отправлен на почту. Проверьте вкладку «Входящие».");
+      setStep("otp");
     }
     setLoading(false);
+  }
+
+  async function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const supabase = createClient();
+    if (!supabase) {
+      setError("Сервис временно недоступен");
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: "email",
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      router.push("/dashboard");
+    }
+    setLoading(false);
+  }
+
+  function handleBack() {
+    setStep("email");
+    setOtp("");
+    setError(null);
+    setMessage(null);
   }
 
   return (
@@ -53,60 +82,74 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">
-            {mode === "login" ? "С возвращением" : "Создать аккаунт"}
+            {step === "email" ? "Вход / Регистрация" : "Введите код"}
           </CardTitle>
           <CardDescription>
-            Войдите, чтобы сохранять прогресс и проекты
+            {step === "email"
+              ? "Введите почту — отправим 6-значный код для входа или регистрации"
+              : `Код отправлен на ${email}`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              type="email"
-              placeholder="you@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Пароль (минимум 6 символов)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-            {error && (
-              <p className="text-sm text-red-400">{error}</p>
-            )}
-            {message && (
-              <p className="text-sm text-emerald-400">{message}</p>
-            )}
-            <Button
-              type="submit"
-              variant="gradient"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading
-                ? "Подождите…"
-                : mode === "login"
-                  ? "Войти"
-                  : "Зарегистрироваться"}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            {mode === "login" ? "Нет аккаунта? " : "Уже есть аккаунт? "}
-            <button
-              type="button"
-              className="text-emerald-400 font-medium hover:underline"
-              onClick={() =>
-                setMode(mode === "login" ? "signup" : "login")
-              }
-            >
-              {mode === "login" ? "Создать" : "Войти"}
-            </button>
-          </p>
+          {step === "email" ? (
+            <form onSubmit={handleSendOtp} className="space-y-4">
+              <Input
+                type="email"
+                placeholder="you@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
+              {error && (
+                <p className="text-sm text-red-400">{error}</p>
+              )}
+              {message && (
+                <p className="text-sm text-emerald-400">{message}</p>
+              )}
+              <Button
+                type="submit"
+                variant="gradient"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? "Отправляю…" : "Отправить код"}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                placeholder="000000"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                required
+                autoFocus
+                className="text-center text-2xl tracking-[0.5em] font-mono"
+              />
+              {error && (
+                <p className="text-sm text-red-400">{error}</p>
+              )}
+              <Button
+                type="submit"
+                variant="gradient"
+                className="w-full"
+                disabled={loading || otp.length !== 6}
+              >
+                {loading ? "Проверяю…" : "Войти"}
+              </Button>
+              <button
+                type="button"
+                className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={handleBack}
+              >
+                ← Изменить email
+              </button>
+            </form>
+          )}
           <Link
             href="/"
             className="mt-4 block text-center text-xs text-muted-foreground hover:underline"
