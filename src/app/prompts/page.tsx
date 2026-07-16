@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Copy, Sparkles } from "lucide-react";
+import { Copy, Sparkles, Zap, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,9 @@ const roles = [
   "DevOps-инженер",
   "Эксперт по базам данных",
   "Технический писатель",
+  "Full-stack разработчик",
+  "Мобильный разработчик",
+  "AI/ML инженер",
 ];
 
 const formats = [
@@ -21,6 +24,8 @@ const formats = [
   "Список шагов",
   "Таблица сравнения",
   "Краткий план",
+  "Архитектурное описание",
+  "Code review",
 ];
 
 const tones = [
@@ -38,6 +43,8 @@ export default function PromptsPage() {
   const [format, setFormat] = React.useState(formats[0]);
   const [tone, setTone] = React.useState(tones[1]);
   const [result, setResult] = React.useState("");
+  const [enhancing, setEnhancing] = React.useState(false);
+  const [enhanced, setEnhanced] = React.useState(false);
 
   function build() {
     const parts = [
@@ -46,9 +53,28 @@ export default function PromptsPage() {
       `Задача: ${task.trim() || "..."}`,
       constraints.trim() && `Ограничения: ${constraints.trim()}`,
       `Формат ответа: ${format}.`,
-      `Тон: ${tone}.`,
+      `Тон общения: ${tone}.`,
     ].filter(Boolean);
     setResult(parts.join("\n\n"));
+    setEnhanced(false);
+  }
+
+  async function enhance() {
+    if (!task.trim()) return;
+    setEnhancing(true);
+    try {
+      const res = await fetch("/api/prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role, task, context, constraints, format, tone }),
+      });
+      const data = await res.json();
+      setResult(data.prompt);
+      setEnhanced(data.enhanced);
+    } catch {
+      build();
+    }
+    setEnhancing(false);
   }
 
   function copy() {
@@ -60,8 +86,8 @@ export default function PromptsPage() {
       <div className="text-center mb-10">
         <h1 className="text-3xl sm:text-4xl font-bold">Генератор промптов</h1>
         <p className="mt-2 text-muted-foreground">
-          Соберите чёткий промпт по структуре РОЛЬ + КОНТЕКСТ + ЗАДАЧА +
-          ОГРАНИЧЕНИЯ + ФОРМАТ.
+          Соберите промпт по структуре РОЛЬ + КОНТЕКСТ + ЗАДАЧА + ОГРАНИЧЕНИЯ +
+          ФОРМАТ. ИИ улучшит его автоматически.
         </p>
       </div>
 
@@ -131,14 +157,37 @@ export default function PromptsPage() {
               </select>
             </div>
           </div>
-          <Button variant="gradient" className="w-full" onClick={build}>
-            <Sparkles size={16} /> Сгенерировать
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="gradient" className="flex-1" onClick={build}>
+              <Sparkles size={16} /> Собрать
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={enhance}
+              disabled={enhancing || !task.trim()}
+            >
+              {enhancing ? (
+                "Улучшаю…"
+              ) : (
+                <>
+                  <Wand2 size={16} /> Улучшить ИИ
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         <Card className="md:sticky md:top-20 self-start">
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="text-base">Готовый промпт</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              Готовый промпт
+              {enhanced && (
+                <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">
+                  <Zap size={10} className="inline" /> ИИ
+                </span>
+              )}
+            </CardTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -156,7 +205,7 @@ export default function PromptsPage() {
               </pre>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Заполните поля слева и нажмите «Сгенерировать».
+                Заполните поля слева и нажмите «Собрать» или «Улучшить ИИ».
               </p>
             )}
           </CardContent>

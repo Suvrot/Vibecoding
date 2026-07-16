@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const SYSTEM_PROMPT = `Ты — дружелюбный ИИ-наставник по Vibe Coding на русском языке. 
 Помогаешь новичкам учиться кодить с помощью ИИ-инструментов (Cursor, VS Code, Windsurf, Lovable, Bolt.new, Replit, Claude, ChatGPT).
 Объясняй просто, давай примеры кода, подсказывай промпты. Будь поддерживающим. 
-Если вопрос не по теме кодинга — вежливо верни к обучению. Отвечай лаконично, но по делу.`;
+Если вопрос не по теме кодинга — вежливо верни к обучению. Отвечай лаконично, но по делу. Максимум 3-4 абзаца.`;
 
 const rateMap = new Map<string, { count: number; reset: number }>();
 const RATE_LIMIT = 20;
@@ -31,67 +31,41 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { createServerClient } = await import("@supabase/ssr");
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll();
-        },
-        setAll() {},
-      },
-    },
-  );
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const { messages } = await req.json();
+  const last = messages[messages.length - 1]?.content ?? "";
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  const baseUrl = process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1";
-  const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+  const geminiKey = process.env.GEMINI_API_KEY;
 
-  if (!apiKey) {
-    const last = messages[messages.length - 1]?.content ?? "";
-    const reply = demoReply(last);
-    return NextResponse.json({ reply });
-  }
-
-  if (!user) {
-    const last = messages[messages.length - 1]?.content ?? "";
-    const reply = demoReply(last);
-    return NextResponse.json({ reply });
+  if (!geminiKey) {
+    return NextResponse.json({ reply: demoReply(last) });
   }
 
   try {
-    const res = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+    const contents = [
+      { role: "user", parts: [{ text: SYSTEM_PROMPT + "\n\nОтвечай как наставник." }] },
+      { role: "model", parts: [{ text: "Понял! Я готов помогать с Vibe Coding." }] },
+      ...messages.map((m: { role: string; content: string }) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      })),
+    ];
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents }),
       },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages.map((m: { role: string; content: string }) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        ],
-        temperature: 0.7,
-      }),
-    });
+    );
+
     const data = await res.json();
     const reply =
-      data?.choices?.[0]?.message?.content ??
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ??
       "Извини, не удалось получить ответ. Попробуй переформулировать.";
     return NextResponse.json({ reply });
   } catch {
-    return NextResponse.json({ reply: demoReply(messages.at(-1)?.content ?? "") });
+    return NextResponse.json({ reply: demoReply(last) });
   }
 }
 
