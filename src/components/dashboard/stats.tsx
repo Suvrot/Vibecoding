@@ -25,13 +25,13 @@ export function StatsGrid({ profile }: { profile: Profile }) {
     {
       icon: CheckCircle2,
       label: "Уроки",
-      value: `${profile.completedLessons.length}/${totalLessons}`,
+      value: `${(profile.completedLessons ?? []).length}/${totalLessons}`,
       sub: "пройдено",
     },
     {
       icon: Star,
       label: "Достижения",
-      value: `${profile.achievements.length}`,
+      value: `${(profile.achievements ?? []).length}`,
       sub: "открыто",
     },
   ];

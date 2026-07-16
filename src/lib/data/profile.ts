@@ -21,7 +21,12 @@ export async function getProfile(): Promise<Profile | null> {
     .single();
 
   if (!data) return null;
-  return data as Profile;
+  return {
+    ...data,
+    completedLessons: data.completed_lessons ?? [],
+    achievements: data.achievements ?? [],
+    createdAt: data.created_at,
+  } as Profile;
 }
 
 export async function getProjects(userId: string): Promise<Project[]> {
