@@ -36,8 +36,13 @@ export async function POST(req: NextRequest) {
 
     const data = await res.json();
     const prompt =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ??
-      buildPrompt(role, task, context, constraints, format, tone);
+      data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!prompt) {
+      return NextResponse.json({
+        prompt: buildPrompt(role, task, context, constraints, format, tone),
+        enhanced: false,
+      });
+    }
     return NextResponse.json({ prompt, enhanced: true });
   } catch {
     return NextResponse.json({

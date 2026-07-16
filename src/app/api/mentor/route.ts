@@ -61,8 +61,10 @@ export async function POST(req: NextRequest) {
 
     const data = await res.json();
     const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ??
-      "Извини, не удалось получить ответ. Попробуй переформулировать.";
+      data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!reply) {
+      return NextResponse.json({ reply: demoReply(last) });
+    }
     return NextResponse.json({ reply });
   } catch {
     return NextResponse.json({ reply: demoReply(last) });
