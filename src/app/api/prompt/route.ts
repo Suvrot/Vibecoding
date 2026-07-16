@@ -3,11 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   const { role, task, context, constraints, format, tone } = await req.json();
 
-  const geminiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
 
-  if (!geminiKey) {
-    const prompt = buildPrompt(role, task, context, constraints, format, tone);
-    return NextResponse.json({ prompt, enhanced: false });
+  if (!apiKey) {
+    return NextResponse.json({
+      prompt: buildPrompt(role, task, context, constraints, format, tone),
+      enhanced: false,
+    });
   }
 
   try {
@@ -21,22 +23,25 @@ export async function POST(req: NextRequest) {
 Формат: ${format}
 Тон: ${tone}`;
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            { role: "user", parts: [{ text: systemMsg + "\n\n" + userMsg }] },
-          ],
-        }),
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
       },
-    );
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemMsg },
+          { role: "user", content: userMsg },
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+      }),
+    });
 
     const data = await res.json();
-    const prompt =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const prompt = data?.choices?.[0]?.message?.content;
     if (!prompt) {
       return NextResponse.json({
         prompt: buildPrompt(role, task, context, constraints, format, tone),
