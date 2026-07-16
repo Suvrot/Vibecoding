@@ -86,7 +86,7 @@ export default function LoginPage() {
           </CardTitle>
           <CardDescription>
             {step === "email"
-              ? "Введите почту — отправим 6-значный код для входа или регистрации"
+              ? "Введите почту — отправим код для входа или регистрации"
               : `Код отправлен на ${email}`}
           </CardDescription>
         </CardHeader>
@@ -121,14 +121,14 @@ export default function LoginPage() {
               <Input
                 type="text"
                 inputMode="numeric"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                placeholder="000000"
+                pattern="[0-9]+"
+                maxLength={8}
+                placeholder="Код из письма"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                 required
                 autoFocus
-                className="text-center text-2xl tracking-[0.5em] font-mono"
+                className="text-center text-2xl tracking-[0.3em] font-mono"
               />
               {error && (
                 <p className="text-sm text-red-400">{error}</p>
@@ -137,7 +137,7 @@ export default function LoginPage() {
                 type="submit"
                 variant="gradient"
                 className="w-full"
-                disabled={loading || otp.length !== 6}
+                disabled={loading || otp.length < 4}
               >
                 {loading ? "Проверяю…" : "Войти"}
               </Button>
