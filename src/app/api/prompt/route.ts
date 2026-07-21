@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
-
-function getClientIp(req: NextRequest): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return req.headers.get("x-real-ip") ?? "unknown";
-}
+import { getClientIp } from "@/lib/utils";
 
 function sanitize(input: unknown, maxLen = 500): string {
   return typeof input === "string" ? input.trim().slice(0, maxLen) : "";

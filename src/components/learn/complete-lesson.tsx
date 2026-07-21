@@ -6,10 +6,13 @@ import { LessonView } from "@/components/learn/lesson-view";
 import type { Lesson } from "@/lib/types";
 
 export function CompleteLesson({ lesson }: { lesson: Lesson }) {
+  const [completing, setCompleting] = React.useState(false);
+
   async function onComplete() {
     const supabase = createClient();
     if (!supabase) return;
 
+    setCompleting(true);
     const res = await fetch("/api/complete-lesson", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -19,7 +22,12 @@ export function CompleteLesson({ lesson }: { lesson: Lesson }) {
     if (!res.ok) {
       console.error("Failed to complete lesson");
     }
+    setCompleting(false);
   }
 
-  return <LessonView lesson={lesson} onComplete={onComplete} />;
+  return (
+    <div className={completing ? "pointer-events-none opacity-60" : ""}>
+      <LessonView lesson={lesson} onComplete={onComplete} />
+    </div>
+  );
 }

@@ -68,9 +68,13 @@ export default function PromptsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role, task, context, constraints, format, tone }),
       });
+      if (!res.ok) {
+        build();
+        return;
+      }
       const data = await res.json();
-      setResult(data.prompt);
-      setEnhanced(data.enhanced);
+      setResult(data.prompt ?? "");
+      setEnhanced(data.enhanced === true);
     } catch {
       build();
     }

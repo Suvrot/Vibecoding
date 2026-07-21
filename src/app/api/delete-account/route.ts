@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 export async function POST() {
   const supabase = await createClient();
@@ -9,14 +9,22 @@ export async function POST() {
     return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
   }
 
-  const { error } = await supabase.auth.admin.deleteUser(user.id);
+  try {
+    const admin = await createAdminClient();
+    const { error } = await admin.auth.admin.deleteUser(user.id);
 
-  if (error) {
+    if (error) {
+      return NextResponse.json(
+        { error: "Не удалось удалить аккаунт. Попробуй позже." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch {
     return NextResponse.json(
-      { error: "Не удалось удалить аккаунт. Попробуй позже." },
+      { error: "Сервис удаления временно недоступен." },
       { status: 500 },
     );
   }
-
-  return NextResponse.json({ ok: true });
 }

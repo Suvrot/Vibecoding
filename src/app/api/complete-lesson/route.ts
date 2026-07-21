@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { levelForXp } from "@/lib/data/achievements";
 
 const VALID_LESSONS = new Set([
   "l1", "l2", "l3", "l4", "l5", "l6",
@@ -39,35 +40,51 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Неверный ID урока" }, { status: 400 });
   }
 
-  const { data: profile } = (await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("xp, completed_lessons, achievements")
     .eq("id", user.id)
-    .single()) as { data: ProfileRow | null };
+    .single() as { data: ProfileRow | null; error: unknown };
 
-  const completed = new Set(profile?.completed_lessons ?? []);
+  if (profileError || !profile) {
+    return NextResponse.json(
+      { error: "Не удалось загрузить профиль" },
+      { status: 500 },
+    );
+  }
+
+  const completed = new Set(profile.completed_lessons ?? []);
   const alreadyCompleted = completed.has(lessonId);
   completed.add(lessonId);
 
   const xp = LESSON_XP[lessonId] ?? 50;
-  const newXp = (profile?.xp ?? 0) + (alreadyCompleted ? 0 : xp);
+  const newXp = profile.xp + (alreadyCompleted ? 0 : xp);
 
-  const achievements = new Set(profile?.achievements ?? []);
+  const achievements = new Set(profile.achievements ?? []);
   achievements.add("first-step");
   const moduleId = MODULE_MAP[lessonId];
   if (moduleId === "m5") achievements.add("data-master");
   if (moduleId === "m6") achievements.add("deploy-pro");
   if (completed.size >= 12) achievements.add("graduate");
 
-  await supabase
+  const { error: updateError } = await supabase
     .from("profiles")
     .update({
       xp: newXp,
       completed_lessons: Array.from(completed),
       achievements: Array.from(achievements),
-      level: Math.max(1, Math.floor(newXp / 200) + 1),
+      level: levelForXp(newXp).current.id,
     })
-    .eq("id", user.id);
+    .eq("id", user.id)
+    .select()
+    .single();
+
+  if (updateError) {
+    return NextResponse.json(
+      { error: "Не удалось сохранить прогресс" },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json({
     success: true,

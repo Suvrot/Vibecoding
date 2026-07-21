@@ -1,13 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Profile, Project } from "@/lib/types";
 
-const hasEnv = !!(
-  process.env.NEXT_PUBLIC_SUPABASE_URL &&
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+function hasSupabaseEnv() {
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
 
 export async function getProfile(): Promise<Profile | null> {
-  if (!hasEnv) return null;
+  if (!hasSupabaseEnv()) return null;
   const supabase = await createClient();
   const {
     data: { user },
@@ -30,7 +32,7 @@ export async function getProfile(): Promise<Profile | null> {
 }
 
 export async function getProjects(userId: string): Promise<Project[]> {
-  if (!hasEnv) return [];
+  if (!hasSupabaseEnv()) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("projects")
@@ -41,7 +43,7 @@ export async function getProjects(userId: string): Promise<Project[]> {
 }
 
 export async function requireUser() {
-  if (!hasEnv) return null;
+  if (!hasSupabaseEnv()) return null;
   const supabase = await createClient();
   const {
     data: { user },

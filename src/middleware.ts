@@ -1,16 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const hasEnv =
-  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
 const protectedRoutes = ["/dashboard", "/projects", "/achievements"];
 const adminRoutes = ["/admin"];
-const adminEmail = process.env.ADMIN_EMAIL;
 
 export async function middleware(request: NextRequest) {
-  // Fail closed: if env is missing, block all protected routes
+  const hasEnv =
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const adminEmail = process.env.ADMIN_EMAIL;
+
   if (!hasEnv || !adminEmail) {
     const url = request.nextUrl.pathname;
     if ([...protectedRoutes, ...adminRoutes].some((r) => url.startsWith(r))) {
@@ -51,7 +50,6 @@ export async function middleware(request: NextRequest) {
 
   const url = request.nextUrl.pathname;
 
-  // Log page view (fire and forget, skip API/static assets)
   if (
     !url.startsWith("/api") &&
     !url.startsWith("/_next") &&
@@ -64,14 +62,12 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Protect admin routes
   if (adminRoutes.some((r) => url.startsWith(r))) {
     if (!user || user.email !== adminEmail) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
-  // Protect regular routes
   if (protectedRoutes.some((r) => url.startsWith(r))) {
     if (!user) {
       return NextResponse.redirect(new URL("/login", request.url));

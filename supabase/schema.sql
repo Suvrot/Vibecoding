@@ -193,3 +193,35 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- App errors: client-side and server-side error logging
+create table if not exists public.app_errors (
+  id uuid primary key default gen_random_uuid(),
+  message text not null,
+  stack text,
+  component_stack text,
+  url text,
+  user_id uuid references auth.users(id) on delete set null,
+  severity text not null default 'error',
+  created_at timestamptz not null default now()
+);
+
+alter table public.app_errors enable row level security;
+
+drop policy if exists "Anyone can insert errors" on public.app_errors;
+create policy "Anyone can insert errors"
+  on public.app_errors for insert
+  with check (true);
+
+drop policy if exists "Admin reads errors" on public.app_errors;
+create policy "Admin reads errors"
+  on public.app_errors for select
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and email = current_setting('request.jwt.claims', true)::json->>'email'
+    )
+  );
+
+create index if not exists idx_app_errors_created_at on public.app_errors (created_at desc);
+create index if not exists idx_app_errors_severity on public.app_errors (severity);

@@ -46,7 +46,7 @@ export function MentorChat() {
       const data = await res.json();
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: data.reply },
+        { role: "assistant", content: data.reply ?? "Не удалось получить ответ. Попробуй ещё раз." },
       ]);
     } catch {
       setMessages((m) => [

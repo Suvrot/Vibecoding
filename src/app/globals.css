@@ -132,7 +132,7 @@ body {
 }
 .animate-float { animation: float 5s ease-in-out infinite; }
 
-@keyframes float {
+@keyframes grid-move {
   0% { background-position: 0 0; }
   100% { background-position: 48px 48px; }
 }

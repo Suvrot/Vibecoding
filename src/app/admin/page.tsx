@@ -1,10 +1,15 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Eye, BookOpen, FolderGit2, TrendingUp } from "lucide-react";
-import { AdminStats } from "@/components/admin/admin-stats";
+import { Users, Eye, FolderGit2, TrendingUp } from "lucide-react";
 import { AdminUsers } from "@/components/admin/admin-users";
 import { AdminExport } from "@/components/admin/admin-export";
+import {
+  getCachedAdminStats,
+  getCachedAdminUsers,
+  getCachedAdminTopPages,
+  getCachedAdminActiveUsers,
+} from "@/lib/data/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -20,56 +25,12 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-  const [
-    { count: totalUsers },
-    { count: todayViews },
-    { count: weekViews },
-    { count: totalProjects },
-    { data: recentUsers },
-    { data: topPages },
-    { data: viewsByDay },
-    { data: activeUsers },
-  ] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("analytics").select("*", { count: "exact", head: true }).gte("created_at", todayStart),
-    supabase.from("analytics").select("*", { count: "exact", head: true }).gte("created_at", weekAgo),
-    supabase.from("projects").select("*", { count: "exact", head: true }),
-    supabase.from("profiles").select("id, email, username, xp, level, completed_lessons, created_at").order("created_at", { ascending: false }).limit(20),
-    supabase.from("analytics").select("page").gte("created_at", weekAgo),
-    supabase.rpc("get_views_by_day").maybeSingle(),
-    supabase.from("profiles").select("id, email, username, xp, completed_lessons").not("completed_lessons", "eq", "{}"),
+  const [stats, profileList, topPagesSorted, activeList] = await Promise.all([
+    getCachedAdminStats(),
+    getCachedAdminUsers(),
+    getCachedAdminTopPages(),
+    getCachedAdminActiveUsers(),
   ]);
-
-  const profileList = (recentUsers ?? []) as Array<{
-    id: string;
-    email: string;
-    username: string;
-    xp: number;
-    level: number;
-    completed_lessons: string[] | null;
-    created_at: string;
-  }>;
-
-  const pageViews = (topPages ?? []) as Array<{ page: string }>;
-  const activeList = (activeUsers ?? []) as Array<{
-    id: string;
-    email: string;
-    username: string;
-    xp: number;
-    completed_lessons: string[] | null;
-  }>;
-
-  const pageCount: Record<string, number> = {};
-  pageViews.forEach((p) => {
-    pageCount[p.page] = (pageCount[p.page] || 0) + 1;
-  });
-  const topPagesSorted = Object.entries(pageCount)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
 
   return (
     <div className="container mx-auto px-4 lg:px-6 py-12">
@@ -86,28 +47,28 @@ export default async function AdminPage() {
           <CardContent className="p-5">
             <Users className="text-emerald-400 mb-2" size={20} />
             <p className="text-sm text-muted-foreground">Всего пользователей</p>
-            <p className="text-2xl font-bold">{totalUsers ?? 0}</p>
+            <p className="text-2xl font-bold">{stats.totalUsers}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-5">
             <Eye className="text-emerald-400 mb-2" size={20} />
             <p className="text-sm text-muted-foreground">Просмотров сегодня</p>
-            <p className="text-2xl font-bold">{todayViews ?? 0}</p>
+            <p className="text-2xl font-bold">{stats.todayViews}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-5">
             <TrendingUp className="text-emerald-400 mb-2" size={20} />
             <p className="text-sm text-muted-foreground">Просмотров за неделю</p>
-            <p className="text-2xl font-bold">{weekViews ?? 0}</p>
+            <p className="text-2xl font-bold">{stats.weekViews}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-5">
             <FolderGit2 className="text-emerald-400 mb-2" size={20} />
             <p className="text-sm text-muted-foreground">Проектов создано</p>
-            <p className="text-2xl font-bold">{totalProjects ?? 0}</p>
+            <p className="text-2xl font-bold">{stats.totalProjects}</p>
           </CardContent>
         </Card>
       </div>

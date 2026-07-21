@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import { ExternalLink, Code, Trash2, Plus } from "lucide-react";
+import { ExternalLink, Code, Plus } from "lucide-react";
 import { requireUser, getProjects } from "@/lib/data/profile";
 import { ProjectForm } from "@/components/projects/project-form";
+import { DeleteProjectButton } from "@/components/projects/delete-project-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -16,15 +15,6 @@ export default async function ProjectsPage() {
   if (!user) redirect("/login");
 
   const projects = await getProjects(user.id);
-
-  async function deleteProject(formData: FormData) {
-    "use server";
-    const id = formData.get("id") as string;
-    if (!user || !id) return;
-    const supabase = await createClient();
-    await supabase.from("projects").delete().eq("id", id).eq("user_id", user.id);
-    revalidatePath("/projects");
-  }
 
   return (
     <div className="container mx-auto px-4 lg:px-6 py-12 max-w-4xl">
@@ -92,16 +82,7 @@ export default async function ProjectsPage() {
                       <Code size={14} /> Код
                     </a>
                   )}
-                  <form action={deleteProject} className="ml-auto">
-                    <input type="hidden" name="id" value={p.id} />
-                    <button
-                      type="submit"
-                      className="text-red-400 hover:text-red-500"
-                      aria-label="Удалить"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </form>
+                  <DeleteProjectButton projectId={p.id} />
                 </div>
               </CardContent>
             </Card>
